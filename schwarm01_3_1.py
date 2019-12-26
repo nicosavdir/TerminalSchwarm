@@ -3,6 +3,8 @@
 import time
 import random
 import os
+import math
+import numpy as np
 clear = lambda: os.system('clear') #on Linux System
 
 size=[100,65]
@@ -33,27 +35,27 @@ class Homie :
     self.movedir(dir)
 
   def movedir(self,dir):
-      #1 2 3
-      #4 0 5
-      #6 7 8
-      if dir==1:
+      #7 0 1
+      #6 8 2
+      #5 4 3
+      if dir==7:
           self.x-=1
           self.y-=1
+      elif dir==0:
+          self.y-=1
+      elif dir==1:
+          self.x+=1
+          self.y-=1
+      elif dir==6:
+          self.x-=1
       elif dir==2:
-          self.y-=1
-      elif dir==3:
           self.x+=1
-          self.y-=1
+      elif dir==5:
+          self.x-=1
+          self.y+=1
       elif dir==4:
-          self.x-=1
-      elif dir==6:
-          self.x+=1
-      elif dir==6:
-          self.x-=1
           self.y+=1
-      elif dir==7:
-          self.y+=1
-      elif dir==8:
+      elif dir==3:
           self.x+=1
           self.y+=1
 
@@ -61,6 +63,11 @@ class Homie :
       for rows in range(self.visionlen):
           for cols in range(self.visionlen):
               print("TODO")
+
+  def calcViewVec(self,i,viewarr):
+      x=(i%self.visionlen)-int((self.visionlen-1)/2)
+      y=(int((i-x)/self.visionlen))-int((self.visionlen-1)/2)
+      return [x,y]
 
 
   def view(self):
@@ -158,6 +165,28 @@ def drawObstacles():
     for numObstacles in range(len(obstacles)):
         obstacles[numObstacles].draw()
 
+
+def unit_vector(vector):
+    return vector / np.linalg.norm(vector)
+
+def vec2dir(vec):
+    base=[0,-1]
+    v1_u = unit_vector(base)
+    v2_u = unit_vector(vec)
+    rad=math.degrees(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)))
+    if vec[0]<0:
+        return int((360-rad)/45)
+    else: return int(rad/45)
+
+def addVec(vec1, vec2):
+    vec=[]
+    vec[0]=vec1[0]+vec2[0]
+    vec[1]=vec1[1]+vec2[1]
+    return vec
+
+def Vec2Length(vec):
+    return abs(sqrt( (vec[0]*vec[0]) + (vec[1]*vec[1])))
+
 #RUN____________________________________________________________________________
 grid=init()
 
@@ -185,6 +214,19 @@ while True:
                changeGrid(g1,g2,0)
 
 
+  def vec2dir(vec):
+      base=[0,-1]
+      scalprod=vec[0]*base[0]+vec[1]*base[1]
+      veclen=Vec2Length(vec)
+      costmp = scalprod/veclen
+
+      return math.cos(costmp)
+
+      base=[0,-1]
+      dot = vec[0]*vec[1] + base[0]*base[1]     # dot product
+      det = vec[0]*base[0] - base[1]*vec[1]      # determinant
+      angle = math.atan2(det, dot)  # atan2(y, x) or atan2(sin, cos)
+      return math.degrees(angle)
 
 
 '''
