@@ -129,27 +129,6 @@ class Homie :
 
 
 
-'''
-  def view(self):
-      if self.direction==0:
-          for rows in range(4):
-            for cols in range(4):
-                g1=int(cols-self.x/2+self.x)
-                g2=int(rows-self.y/2+self.y)
-
-                #sicht infärben
-                changeGrid(g1,g2,0)
-
-                if getGrid(g1,g2)== 10:
-                    return 1
-      else:
-          return 0
-
-'''
-
-
-
-
 
 
 grid=init()
@@ -160,6 +139,5 @@ while True:
 
     cleanscreen(0)
     drawhomies()
-#changeGrid(5,5,0)
 
     screen(grid)
