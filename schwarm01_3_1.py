@@ -127,25 +127,27 @@ class Homie :
       return viewarray
 
 
+def spawnObstacles(num):
+    for numObstacles in range(num):
+        obsSize=[2,2]
+        obstacles.append(Obstacle(numObstacles,random.randint(0,size[0]-1-obsSize[0]),random.randint(0,size[1]-1-obsSize[1]),obsSize[0],obsSize[1]))
+        obstacles[numObstacles].draw()
+
+class Obstacle:
+  def __init__(self, id, x, y, height, width):
+    self.x = x
+    self.y = y
+    self.height = height
+    self.width = width
+    self.id = id
+    self.ascii = 10
+
+  def draw(self):
+      for rows in range(self.height):
+        for cols in range(self.width):
+            changeGrid(self.x+cols,self.y+rows,self.ascii)
 
 
-'''
-  def view(self):
-      if self.direction==0:
-          for rows in range(4):
-            for cols in range(4):
-                g1=int(cols-self.x/2+self.x)
-                g2=int(rows-self.y/2+self.y)
-
-                #sicht infärben
-                changeGrid(g1,g2,0)
-
-                if getGrid(g1,g2)== 10:
-                    return 1
-      else:
-          return 0
-
-'''
 
 
 
@@ -155,6 +157,7 @@ class Homie :
 grid=init()
 
 homies=spawnhomies(10)
+obstacles=spawnObstacles(10)
 while True:
     time.sleep(0.1)
 
