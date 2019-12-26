@@ -47,10 +47,12 @@ def spawnhomies(num):
         homie.append(Homie(numhomies,random.randint(20,size[0]-1-20),random.randint(20,size[1]-1-20)))
     return homie
 
-def iteratehomies():
+def iteratehomies(func):
     for numhomies in range(len(homies)):
-        homies[numhomies].think()
-        homies[numhomies].draw()
+        if func==0:
+            homies[numhomies].think()
+        elif func ==1:
+            homies[numhomies].draw()
 
 
 
@@ -67,6 +69,7 @@ class Homie :
     print("Hello my name is " + self.name)
 
   def draw(self):
+      #self.drawviewarea()
       changeGrid(self.x,self.y,self.ascii)
 
   def random_move(self):
@@ -108,11 +111,20 @@ class Homie :
               viewarray.append(getGrid(g1,g2))
 
               changeGrid(g1,g2,0)
-
       return viewarray
+
+  def drawviewarea(self):
+       v_range=5
+       viewarray=[]
+       for rows in range(v_range):
+           for cols in range(v_range):
+               g1=int(self.x -2 +cols)
+               g2=int(self.y -2 +rows)
+               changeGrid(g1,g2,0)
 
   def think(self):
       viewed=self.view()
+      print(viewed)
       for v in range(len(viewed)):
           if viewed[v]==1:
               do = 0
@@ -122,17 +134,22 @@ class Homie :
       if self.do == 0:
           self.random_move()
       elif self.do == 10:
+          time.sleep(10)
           print("10!")
 
 
-def spawnObstacles(num):
+def spawnObstacles(num,ascii):
     for numObstacles in range(num):
         obsSize=[2,2]
-        obstacles.append(Obstacle(numObstacles,random.randint(0,size[0]-1-obsSize[0]),random.randint(0,size[1]-1-obsSize[1]),obsSize[0],obsSize[1]))
+        obstacles.append(Obstacle(numObstacles,random.randint(0,size[0]-1-obsSize[0]),random.randint(0,size[1]-1-obsSize[1]),obsSize[0],obsSize[1],ascii))
+    return obstacles
+
+def drawObstacles():
+    for numObstacles in range(len(obstacles)):
         obstacles[numObstacles].draw()
 
 class Obstacle:
-  def __init__(self, id, x, y, height, width):
+  def __init__(self, id, x, y, height, width, ascii):
     self.x = x
     self.y = y
     self.height = height
@@ -149,11 +166,14 @@ class Obstacle:
 grid=init()
 
 homies=spawnhomies(10)
-obstacles=spawnObstacles(10)
+obstacles=spawnObstacles(10,10)
 while True:
     time.sleep(0.1)
 
+    #drawObstacles()
+    iteratehomies(0)#THINK
     cleanscreen(0)
-    iteratehomies()
+    drawObstacles()
+    iteratehomies(1)#DRAW
 
     screen(grid)
