@@ -111,8 +111,6 @@ class Homie :
         self.x+=1
         self.y+=1
 
-  def wizzl():
-      kaka=1
 
   def view(self):
       v_range=5
