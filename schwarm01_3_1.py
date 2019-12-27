@@ -22,6 +22,7 @@ class Homie :
     self.direction = random.randint(0,8)
     self.do = 0
     self.visionlen = 5
+    self.viewarray = []
 
   def myFunc(self):
     print("Hello my name is " + self.name)
@@ -60,9 +61,22 @@ class Homie :
           self.y+=1
 
   def move_avoid(self,ascii):
-      for rows in range(self.visionlen):
-          for cols in range(self.visionlen):
-              print("TODO")
+      avoid_vectors = []
+      for i in range(self.visionlen*self.visionlen):
+          if self.viewarray[i]==ascii:
+              avoid_vectors.append(self.calcViewVec(i,self.viewarray))
+      #print(avoid_vectors)
+
+      addedvec=[0,0]
+      for i in range(len(avoid_vectors)):
+          addedvec=addVec(addedvec,avoid_vectors[i])
+
+      self.movedir(vec2dir(invertVec(addedvec)))
+
+      if addedvec==[0,0]:
+          return True
+      else: return False
+
 
   def calcViewVec(self,i,viewarr):
       x=(i%self.visionlen)-int((self.visionlen-1)/2)
@@ -71,27 +85,28 @@ class Homie :
 
 
   def view(self):
-      viewarray=[]
+      self.viewarray=[]
       for rows in range(self.visionlen):
           for cols in range(self.visionlen):
               g1=int(self.x - int((self.visionlen-1)/2) +cols)
               g2=int(self.y - int((self.visionlen-1)/2) +rows)
 
-              viewarray.append(getGrid(g1,g2))
+              self.viewarray.append(getGrid(g1,g2))
 
               changeGrid(g1,g2,0)
-      return viewarray
+      return self.viewarray
 
   def think(self):
       viewed=self.view()
-      print(viewed)
+      print(viewed) #REM
       if viewed.__contains__(10):
           self.do=10
 
       if self.do == 0:
           self.random_move()
       elif self.do == 10:
-          print("10!")
+          if self.move_avoid(10):
+              self.do=0
 
 
 class Obstacle:
@@ -157,7 +172,7 @@ def iteratehomies(func):
 
 def spawnObstacles(num,ascii):
     for numObstacles in range(num):
-        obsSize=[2,2]
+        obsSize=[random.randint(0,10),random.randint(0,10)]
         obstacles.append(Obstacle(numObstacles,random.randint(0,size[0]-1-obsSize[0]),random.randint(0,size[1]-1-obsSize[1]),obsSize[0],obsSize[1],ascii))
     return obstacles
 
@@ -165,7 +180,16 @@ def drawObstacles():
     for numObstacles in range(len(obstacles)):
         obstacles[numObstacles].draw()
 
+def buildWall():
+    for i in range(2):
+        for j in range(size[0]):
+            changeGrid(j,0,10)
+            changeGrid(j,size[1]-1,10)
+        for j in range(size[1]):
+            changeGrid(0,j,10)
+            changeGrid(size[0]-1,j,10)
 
+#Angelfunctions
 def unit_vector(vector):
     return vector / np.linalg.norm(vector)
 
@@ -174,12 +198,15 @@ def vec2dir(vec):
     v1_u = unit_vector(base)
     v2_u = unit_vector(vec)
     rad=math.degrees(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)))
-    if vec[0]<0:
+    if vec==[0,0]:
+        return 8
+    elif vec[0]<0:
         return int((360-rad)/45)
-    else: return int(rad/45)
+    else:
+        return int(rad/45)
 
 def addVec(vec1, vec2):
-    vec=[]
+    vec=[0,0]
     vec[0]=vec1[0]+vec2[0]
     vec[1]=vec1[1]+vec2[1]
     return vec
@@ -187,17 +214,21 @@ def addVec(vec1, vec2):
 def Vec2Length(vec):
     return abs(sqrt( (vec[0]*vec[0]) + (vec[1]*vec[1])))
 
+def invertVec(vec): return[-vec[0],-vec[1]]
+
+
 #RUN____________________________________________________________________________
 grid=init()
 
-homies=spawnhomies(10)
-obstacles=spawnObstacles(10,10)
+homies=spawnhomies(30)
+obstacles=spawnObstacles(20,10)
 while True:
     time.sleep(0.1)
 
     iteratehomies(0)#THINK
     cleanscreen(0)
     drawObstacles()
+    buildWall()
     iteratehomies(1)#DRAW
 
     screen(grid)
