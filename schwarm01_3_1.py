@@ -21,7 +21,7 @@ class Homie :
     self.ascii = 6
     self.direction = random.randint(0,8)
     self.do = 0
-    self.visionlen = 5
+    self.visionlen = 7
     self.viewarray = []
 
   def myFunc(self):
@@ -98,7 +98,6 @@ class Homie :
 
   def think(self):
       viewed=self.view()
-      print(viewed) #REM
       if viewed.__contains__(10):
           self.do=10
 
@@ -157,9 +156,10 @@ def changeGrid(x,y,ascii):
     return grid
 
 def spawnhomies(num):
+    edge=5
     homie=[]
     for numhomies in range(num):
-        homie.append(Homie(numhomies,random.randint(20,size[0]-1-20),random.randint(20,size[1]-1-20)))
+        homie.append(Homie(numhomies,random.randint(edge,size[0]-1-edge),random.randint(edge,size[1]-1-edge)))
     return homie
 
 def iteratehomies(func):
@@ -220,7 +220,7 @@ def invertVec(vec): return[-vec[0],-vec[1]]
 #RUN____________________________________________________________________________
 grid=init()
 
-homies=spawnhomies(30)
+homies=spawnhomies(50)
 obstacles=spawnObstacles(20,10)
 while True:
     time.sleep(0.1)
