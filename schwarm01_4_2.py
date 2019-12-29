@@ -7,7 +7,12 @@ import math
 import numpy as np
 clear = lambda: os.system('clear') #on Linux System
 
-size=[50,50]
+SIZEX = 50
+SIZEY = 50
+NUMHOMIES = 10
+NUMOBSTACLES = 10
+
+size=[SIZEX,SIZEY]
 asciitable=[' ','.','-',':','=','#','@','░','▒','■','▓','█']
 
 #CLASSES________________________________________________________________________
@@ -18,6 +23,7 @@ class Homie :
     self.id = id
     self.ascii = 6
     self.do = 0
+    self.dir = [0,0]
     self.visionlen = 7
     self.viewarray = []
 
@@ -28,7 +34,7 @@ class Homie :
       changeGrid(self.x,self.y,self.ascii)
 
   def random_move(self):
-    self.movedir([random.randint(-1,1),random.randint(-1,1)])
+    self.dir=[random.randint(-1,1),random.randint(-1,1)]
 
 
   def movedir(self,vec):
@@ -46,7 +52,8 @@ class Homie :
       for i in range(len(avoid_vectors)):
           addedvec=addVec(addedvec,avoid_vectors[i])
 
-      self.movedir(unitVector(invertVec(addedvec)))
+      self.dir = unitVector(invertVec(addedvec))
+      self.movedir(self.dir)
       if addedvec==[0,0]:
           return True
       else:
@@ -63,11 +70,17 @@ class Homie :
       for i in range(len(vectors)):
           addedvec=addVec(addedvec,vectors[i])
 
-      self.movedir(unitVector(addedvec))
+      self.dir=unitVector(addedvec)
+      self.movedir(self.dir)
       if addedvec==[0,0]:
           return True
       else:
           return False
+
+
+  def collision(self):
+      print(getGrid(self.x+self.dir[0],self.y+self.dir[1]))
+      return getGrid(self.x+self.dir[0],self.y+self.dir[1])
 
   def eat(self):
       for i in range(len(food)-1):
@@ -89,21 +102,24 @@ class Homie :
               g2=int(self.y - int((self.visionlen-1)/2) +rows)
 
               self.viewarray.append(getGrid(g1,g2))
-              changeGrid(g1,g2,0)
       return self.viewarray
 
   def think(self):
       viewed=self.view()
-      if viewed.__contains__(10):
-          self.do=10
-      elif viewed.__contains__(1):
+      #if viewed.__contains__(10):
+          #self.do=10
+      if viewed.__contains__(1):
           self.do=1
 
       if self.do == 0:
           self.random_move()
-      elif self.do == 10:
-          if self.move_avoid(10):
-              self.do=0
+
+          while self.collision()==10:
+              self.random_move()
+          self.movedir(self.dir)
+     # elif self.do == 10:
+          #if self.move_avoid(10):
+              #self.do=0
       elif self.do == 1:
           if self.move_Target(1):
               self.eat()
@@ -153,7 +169,10 @@ def screen(grid):
         print(end='\n')
 
 def getGrid(x,y):
-    return grid[y+x*size[1]]
+    if y+x*size[1] > SIZEX*SIZEY:
+        return 0
+    else:
+        return grid[y+x*size[1]]
 
 def changeGrid(x,y,ascii):
     grid[y+x*size[1]]=ascii
@@ -210,8 +229,6 @@ def unitVector(vector):
         retvec[1]=vector[1]/Vec2Length(vector)
         return retvec
 
-
-
 def addVec(vec1, vec2):
     vec=[0,0]
     vec[0]=vec1[0]+vec2[0]
@@ -227,8 +244,8 @@ def invertVec(vec): return[-vec[0],-vec[1]]
 #RUN____________________________________________________________________________
 grid=init()
 
-homies=spawnhomies(10)
-obstacles=spawnObstacles(10,10)
+homies=spawnhomies(NUMHOMIES)
+obstacles=spawnObstacles(NUMOBSTACLES,10)
 food=spawnFood(20,1)
 while True:
     time.sleep(0.1)
