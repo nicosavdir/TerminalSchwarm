@@ -9,9 +9,6 @@ clear = lambda: os.system('clear') #on Linux System
 
 size=[50,50]
 asciitable=[' ','.','-',':','=','#','@','░','▒','■','▓','█']
-homies=[]
-obstacles=[]
-food = []
 
 #CLASSES________________________________________________________________________
 class Homie :
@@ -28,7 +25,6 @@ class Homie :
     print("Hello my name is " + self.name)
 
   def draw(self):
-      #self.drawviewarea()
       changeGrid(self.x,self.y,self.ascii)
 
   def random_move(self):
@@ -50,12 +46,13 @@ class Homie :
       for i in range(len(avoid_vectors)):
           addedvec=addVec(addedvec,avoid_vectors[i])
 
-      self.movedir(unit_vector(invertVec(addedvec)))
+      self.movedir(unitVector(invertVec(addedvec)))
       if addedvec==[0,0]:
           return True
-      else: return False
+      else:
+          return False
 
-      #schöner machen
+
   def move_Target(self,ascii):
       vectors = []
       for i in range(self.visionlen*self.visionlen):
@@ -66,15 +63,16 @@ class Homie :
       for i in range(len(vectors)):
           addedvec=addVec(addedvec,vectors[i])
 
-      self.movedir(addedvec)
+      self.movedir(unitVector(addedvec))
       if addedvec==[0,0]:
           return True
-      else: return False
+      else:
+          return False
 
   def eat(self):
       for i in range(len(food)-1):
         if self.x == food[i].x and self.y == food[i].y:
-            print("essen")
+            print("ham")
             food.pop(i)
 
   def calcViewVec(self,i,viewarr):
@@ -91,7 +89,6 @@ class Homie :
               g2=int(self.y - int((self.visionlen-1)/2) +rows)
 
               self.viewarray.append(getGrid(g1,g2))
-
               changeGrid(g1,g2,0)
       return self.viewarray
 
@@ -108,9 +105,8 @@ class Homie :
           if self.move_avoid(10):
               self.do=0
       elif self.do == 1:
-          self.eat()
           if self.move_Target(1):
-              #self.eat()
+              self.eat()
               self.do=0
 
 
@@ -178,16 +174,18 @@ def iteratehomies(func):
             homies[numhomies].draw()
 
 def spawnObstacles(num,ascii):
+    obstacles=[]
     for numObstacles in range(num):
         obsSize=[random.randint(0,10),random.randint(0,10)]
         obstacles.append(Obstacle(numObstacles,random.randint(0,size[0]-1-obsSize[0]),random.randint(0,size[1]-1-obsSize[1]),obsSize[0],obsSize[1],ascii))
     return obstacles
 
 def spawnFood(num,ascii):
+    food=[]
     for numObstacles in range(num):
         obsSize=[1,1]
-        obstacles.append(Obstacle(numObstacles,random.randint(0,size[0]-1-obsSize[0]),random.randint(0,size[1]-1-obsSize[1]),obsSize[0],obsSize[1],ascii))
-    return obstacles
+        food.append(Obstacle(numObstacles,random.randint(0,size[0]-1-obsSize[0]),random.randint(0,size[1]-1-obsSize[1]),obsSize[0],obsSize[1],ascii))
+    return food
 
 def drawObstacles(obstacles):
     for numObstacles in range(len(obstacles)):
@@ -203,27 +201,15 @@ def buildWall():
             changeGrid(size[0]-1,j,10)
 
 #Angelfunctions
-def unit_vector(vector):
+def unitVector(vector):
     if Vec2Length(vector)==0:
         return vector
     else:
         retvec=[0,0]
         retvec[0]=vector[0]/Vec2Length(vector)
         retvec[1]=vector[1]/Vec2Length(vector)
-        print(retvec)
         return retvec
 
-def vec2dir(vec):
-    base=[0,-1]
-    v1_u = unit_vector(base)
-    v2_u = unit_vector(vec)
-    rad=math.degrees(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)))
-    if vec==[0,0]:
-        return 8
-    elif vec[0]<0:
-        return int((360-rad)/45)
-    else:
-        return int(rad/45)
 
 
 def addVec(vec1, vec2):
@@ -243,14 +229,14 @@ grid=init()
 
 homies=spawnhomies(10)
 obstacles=spawnObstacles(10,10)
-#food=spawnFood(20,1)
+food=spawnFood(20,1)
 while True:
     time.sleep(0.1)
 
     iteratehomies(0)#THINK
     cleanscreen(0)
     drawObstacles(obstacles)
-    #drawObstacles(food)
+    drawObstacles(food)
     buildWall()
     iteratehomies(1)#DRAW
 
@@ -258,5 +244,17 @@ while True:
 
 
 '''TRASHCAN
+
+def vec2dir(vec):
+    base=[0,-1]
+    v1_u = unitVector(base)
+    v2_u = unitVector(vec)
+    rad=math.degrees(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)))
+    if vec==[0,0]:
+        return 8
+    elif vec[0]<0:
+        return int((360-rad)/45)
+    else:
+        return int(rad/45)
 
 '''
