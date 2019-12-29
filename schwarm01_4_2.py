@@ -7,10 +7,11 @@ import math
 import numpy as np
 clear = lambda: os.system('clear') #on Linux System
 
-SIZEX = 50
-SIZEY = 50
-NUMHOMIES = 10
-NUMOBSTACLES = 10
+SIZEX = 15
+SIZEY = 15
+NUMHOMIES = 1
+NUMOBSTACLES = 0
+NUMFOOD = 5
 
 size=[SIZEX,SIZEY]
 asciitable=[' ','.','-',':','=','#','@','░','▒','■','▓','█']
@@ -26,6 +27,7 @@ class Homie :
     self.dir = [0,0]
     self.visionlen = 7
     self.viewarray = []
+    self.target = [0,0]
 
   def myFunc(self):
     print("Hello my name is " + self.name)
@@ -60,7 +62,7 @@ class Homie :
           return False
 
 
-  def move_Target(self,ascii):
+  def moveToLocation(self,ascii):
       vectors = []
       for i in range(self.visionlen*self.visionlen):
           if self.viewarray[i]==ascii:
@@ -71,6 +73,8 @@ class Homie :
           addedvec=addVec(addedvec,vectors[i])
 
       self.dir=unitVector(addedvec)
+      while self.collision()==10:
+          self.random_move()
       self.movedir(self.dir)
       if addedvec==[0,0]:
           return True
@@ -78,9 +82,22 @@ class Homie :
           return False
 
 
+  def move_Target(self):
+      targetvector=[self.target[0]-self.x,self.target[0]-self.y]
+      self.dir=unitVector(targetvector)
+      while self.collision()==10:
+          self.random_move()
+      self.movedir(self.dir)
+      if targetvector==[0,0]:
+          print("hamhamham ")
+          return True
+      else:
+          return False
+
+
   def collision(self):
-      print(getGrid(self.x+self.dir[0],self.y+self.dir[1]))
-      return getGrid(self.x+self.dir[0],self.y+self.dir[1])
+      print(getGrid(int(round(self.x+self.dir[0])),int(round(self.y+self.dir[1]))))
+      return getGrid(int(round(self.x+self.dir[0])),int(round(self.y+self.dir[1])))
 
   def eat(self):
       for i in range(len(food)-1):
@@ -89,8 +106,8 @@ class Homie :
             food.pop(i)
 
   def calcViewVec(self,i,viewarr):
-      x=(i%self.visionlen)-int((self.visionlen-1)/2)
-      y=(int((i-x)/self.visionlen))-int((self.visionlen-1)/2)
+      x=(i%self.visionlen)-int(round((self.visionlen-1)/2))
+      y=(int(round((i-x)/self.visionlen)))-int(round((self.visionlen-1)/2))
       return [x,y]
 
 
@@ -98,18 +115,23 @@ class Homie :
       self.viewarray=[]
       for rows in range(self.visionlen):
           for cols in range(self.visionlen):
-              g1=int(self.x - int((self.visionlen-1)/2) +cols)
-              g2=int(self.y - int((self.visionlen-1)/2) +rows)
+              g1=int(round(self.x - (self.visionlen-1)/2 +cols))
+              g2=int(round(self.y - (self.visionlen-1)/2 +rows))
 
               self.viewarray.append(getGrid(g1,g2))
       return self.viewarray
 
   def think(self):
       viewed=self.view()
-      #if viewed.__contains__(10):
-          #self.do=10
       if viewed.__contains__(1):
           self.do=1
+          for targetnum in range(len(viewed)):
+              if viewed[targetnum] == 1 and self.target == [0,0]:
+                  self.target = addVec(self.calcViewVec(targetnum,viewed),[self.x,self.y])
+                  print("i want to eat, "+str(self.target))
+                  time.sleep(2)
+
+
 
       if self.do == 0:
           self.random_move()
@@ -117,13 +139,12 @@ class Homie :
           while self.collision()==10:
               self.random_move()
           self.movedir(self.dir)
-     # elif self.do == 10:
-          #if self.move_avoid(10):
-              #self.do=0
+
       elif self.do == 1:
-          if self.move_Target(1):
+          if self.move_Target():
               self.eat()
               self.do=0
+              self.target=[0,0]
 
 
 
@@ -246,7 +267,7 @@ grid=init()
 
 homies=spawnhomies(NUMHOMIES)
 obstacles=spawnObstacles(NUMOBSTACLES,10)
-food=spawnFood(20,1)
+food=spawnFood(NUMFOOD,1)
 while True:
     time.sleep(0.1)
 
