@@ -7,7 +7,7 @@ import math
 import numpy as np
 clear = lambda: os.system('clear') #on Linux System
 
-size=[80,50]
+size=[50,50]
 asciitable=[' ','.','-',':','=','#','@','░','▒','■','▓','█']
 homies=[]
 obstacles=[]
@@ -20,7 +20,6 @@ class Homie :
     self.y = y
     self.id = id
     self.ascii = 6
-    self.direction = random.randint(0,8)
     self.do = 0
     self.visionlen = 7
     self.viewarray = []
@@ -33,33 +32,13 @@ class Homie :
       changeGrid(self.x,self.y,self.ascii)
 
   def random_move(self):
-    dir = random.randint(0,8)
-    self.movedir(dir)
+    self.movedir([random.randint(-1,1),random.randint(-1,1)])
 
-  def movedir(self,dir):
-      #7 0 1
-      #6 8 2
-      #5 4 3
-      if dir==7:
-          self.x-=1
-          self.y-=1
-      elif dir==0:
-          self.y-=1
-      elif dir==1:
-          self.x+=1
-          self.y-=1
-      elif dir==6:
-          self.x-=1
-      elif dir==2:
-          self.x+=1
-      elif dir==5:
-          self.x-=1
-          self.y+=1
-      elif dir==4:
-          self.y+=1
-      elif dir==3:
-          self.x+=1
-          self.y+=1
+
+  def movedir(self,vec):
+        self.x+=int(round(vec[0]))
+        self.y+=int(round(vec[1]))
+
 
   def move_avoid(self,ascii):
       avoid_vectors = []
@@ -71,7 +50,7 @@ class Homie :
       for i in range(len(avoid_vectors)):
           addedvec=addVec(addedvec,avoid_vectors[i])
 
-      self.movedir(vec2dir(invertVec(addedvec)))
+      self.movedir(unit_vector(invertVec(addedvec)))
       if addedvec==[0,0]:
           return True
       else: return False
@@ -87,7 +66,7 @@ class Homie :
       for i in range(len(vectors)):
           addedvec=addVec(addedvec,vectors[i])
 
-      self.movedir(vec2dir(addedvec))
+      self.movedir(addedvec)
       if addedvec==[0,0]:
           return True
       else: return False
@@ -131,8 +110,9 @@ class Homie :
       elif self.do == 1:
           self.eat()
           if self.move_Target(1):
-              self.eat()
+              #self.eat()
               self.do=0
+
 
 
 
@@ -224,7 +204,14 @@ def buildWall():
 
 #Angelfunctions
 def unit_vector(vector):
-    return vector / np.linalg.norm(vector)
+    if Vec2Length(vector)==0:
+        return vector
+    else:
+        retvec=[0,0]
+        retvec[0]=vector[0]/Vec2Length(vector)
+        retvec[1]=vector[1]/Vec2Length(vector)
+        print(retvec)
+        return retvec
 
 def vec2dir(vec):
     base=[0,-1]
@@ -238,6 +225,7 @@ def vec2dir(vec):
     else:
         return int(rad/45)
 
+
 def addVec(vec1, vec2):
     vec=[0,0]
     vec[0]=vec1[0]+vec2[0]
@@ -245,7 +233,7 @@ def addVec(vec1, vec2):
     return vec
 
 def Vec2Length(vec):
-    return abs(sqrt( (vec[0]*vec[0]) + (vec[1]*vec[1])))
+    return abs(math.sqrt( (vec[0]*vec[0]) + (vec[1]*vec[1])))
 
 def invertVec(vec): return[-vec[0],-vec[1]]
 
@@ -253,16 +241,16 @@ def invertVec(vec): return[-vec[0],-vec[1]]
 #RUN____________________________________________________________________________
 grid=init()
 
-homies=spawnhomies(50)
-obstacles=spawnObstacles(20,10)
-food=spawnFood(20,1)
+homies=spawnhomies(10)
+obstacles=spawnObstacles(10,10)
+#food=spawnFood(20,1)
 while True:
     time.sleep(0.1)
 
     iteratehomies(0)#THINK
     cleanscreen(0)
     drawObstacles(obstacles)
-    drawObstacles(food)
+    #drawObstacles(food)
     buildWall()
     iteratehomies(1)#DRAW
 
