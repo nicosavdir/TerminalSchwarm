@@ -157,7 +157,8 @@ def cleanscreen(var):
     else:
         for i in range(size[0]*size[1]):
             if grid[i]<=6 and grid[i]>0:
-                grid[i]-=1
+                if grid[i]==2: grid[i]=0
+                else: grid[i]-=1
 
 def screen(grid):
     clear()
@@ -169,7 +170,7 @@ def screen(grid):
         print(end='\n')
 
 def getGrid(x,y):
-    if y+x*size[1] > SIZEX*SIZEY:
+    if x > SIZEX or y > SIZEY:
         return 0
     else:
         return grid[y+x*size[1]]
@@ -251,7 +252,7 @@ while True:
     time.sleep(0.1)
 
     iteratehomies(0)#THINK
-    cleanscreen(0)
+    cleanscreen(1)
     drawObstacles(obstacles)
     drawObstacles(food)
     buildWall()
