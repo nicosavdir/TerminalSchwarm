@@ -83,7 +83,7 @@ class Homie :
 
 
   def move_Target(self):
-      targetvector=[self.target[0]-self.x,self.target[0]-self.y]
+      targetvector=[self.target[0]-self.x,self.target[1]-self.y]
       self.dir=unitVector(targetvector)
       while self.collision()==10:
           self.random_move()
@@ -102,6 +102,8 @@ class Homie :
   def eat(self):
       for i in range(len(food)-1):
         if self.x == food[i].x and self.y == food[i].y:
+            print("food position",food[i].x,food[i].y)
+            print("homie position",self.x,self.y)
             print("ham")
             food.pop(i)
 
@@ -141,9 +143,13 @@ class Homie :
           self.movedir(self.dir)
 
       elif self.do == 1:
-          if self.move_Target():
+          self.move_Target()
+          if self.collision()==1:
+              print("--move target true")
               self.eat()
+              print("--eaten")
               self.do=0
+              print("--do=0")
               self.target=[0,0]
 
 
@@ -190,14 +196,17 @@ def screen(grid):
         print(end='\n')
 
 def getGrid(x,y):
-    if y+x*size[1] > SIZEX*SIZEY:
+    if x >= SIZEX or y >= SIZEY:
         return 0
     else:
         return grid[y+x*size[1]]
 
 def changeGrid(x,y,ascii):
-    grid[y+x*size[1]]=ascii
-    return grid
+    if x > SIZEX or y > SIZEY:
+        return 0
+    else:
+        grid[y+x*size[1]]=ascii
+        return grid
 
 def spawnhomies(num):
     edge=5
@@ -294,5 +303,14 @@ def vec2dir(vec):
         return int((360-rad)/45)
     else:
         return int(rad/45)
+
+
+  def eat(self):
+      for i in range(len(food)-1):
+        if self.x == food[i].x and self.y == food[i].y:
+            print("food position",food[i].x,food[i].y)
+            print("homie position",self.x,self.y)
+            print("ham")
+            food.pop(i)
 
 '''
